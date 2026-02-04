@@ -70,7 +70,7 @@ jobs:
           coverage=$(cat coverage/coverage-summary.json | jq '.total.lines.pct')
           color=$(if (( $(echo "$coverage < 80" | bc -l) )); then echo "red"; else echo "green"; fi)
           curl "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzaservicecoverage" \
-            -X PUT \
+            -X POST \
             -H 'authorization: bearer ${{ secrets.FACTORY_API_KEY }}' \
             -H 'Content-Type: application/json' \
             -d '{"label": "Coverage", "message": "'"$coverage"'%", "color": "'"$color"'"}'
