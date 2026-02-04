@@ -1,0 +1,16 @@
+{
+  "testPathIgnorePatterns": ["/node_modules/"],
+  "collectCoverage": true,
+  "coverageReporters": ["json-summary", "text"],
+  "coveragePathIgnorePatterns": [
+    "/node_modules/",
+    "src/index.js",
+    "src/init.js"
+  ],
+  "coverageThreshold": {
+    "global": {
+      "lines": 80
+    }
+  },
+  "testTimeout": 60000
+}
