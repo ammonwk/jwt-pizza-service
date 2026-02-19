@@ -82,19 +82,80 @@ test('non-self non-admin update returns 403', async () => {
   expect(res.body.message).toBe('unauthorized');
 });
 
-test('delete user returns not implemented', async () => {
+test('list users unauthorized (no token)', async () => {
+  const res = await request(app).get('/api/user');
+  expect(res.status).toBe(401);
+});
+
+test('list users forbidden (non-admin)', async () => {
+  const res = await request(app)
+    .get('/api/user')
+    .set('Authorization', `Bearer ${dinerToken}`);
+  expect(res.status).toBe(403);
+  expect(res.body.message).toBe('unauthorized');
+});
+
+test('list users as admin', async () => {
+  const res = await request(app)
+    .get('/api/user')
+    .set('Authorization', `Bearer ${adminToken}`);
+  expect(res.status).toBe(200);
+  expect(res.body.users).toBeDefined();
+  expect(Array.isArray(res.body.users)).toBe(true);
+  expect(res.body.users.length).toBeGreaterThan(0);
+  // Check user shape
+  const user = res.body.users[0];
+  expect(user.id).toBeDefined();
+  expect(user.name).toBeDefined();
+  expect(user.email).toBeDefined();
+  expect(user.roles).toBeDefined();
+});
+
+test('list users with pagination', async () => {
+  const res = await request(app)
+    .get('/api/user?page=0&limit=2')
+    .set('Authorization', `Bearer ${adminToken}`);
+  expect(res.status).toBe(200);
+  expect(res.body.users.length).toBeLessThanOrEqual(2);
+  expect(typeof res.body.more).toBe('boolean');
+});
+
+test('list users with name filter', async () => {
+  const res = await request(app)
+    .get(`/api/user?name=*${dinerUser.name.substring(0, 3)}*`)
+    .set('Authorization', `Bearer ${adminToken}`);
+  expect(res.status).toBe(200);
+  expect(res.body.users.length).toBeGreaterThanOrEqual(1);
+  expect(res.body.users.some((u) => u.name === dinerUser.name)).toBe(true);
+});
+
+test('delete user unauthorized (no token)', async () => {
+  const res = await request(app).delete(`/api/user/${dinerId}`);
+  expect(res.status).toBe(401);
+});
+
+test('delete user forbidden (non-admin)', async () => {
   const res = await request(app)
     .delete(`/api/user/${dinerId}`)
     .set('Authorization', `Bearer ${dinerToken}`);
-  expect(res.status).toBe(200);
-  expect(res.body.message).toBe('not implemented');
+  expect(res.status).toBe(403);
+  expect(res.body.message).toBe('unauthorized');
 });
 
-test('list users returns not implemented', async () => {
+test('admin can delete user', async () => {
+  // Create a user to delete
+  const name = randomName();
+  const email = name + '@test.com';
+  const reg = await request(app).post('/api/auth').send({ name, email, password: 'pass' });
+  const userId = reg.body.user.id;
+
   const res = await request(app)
-    .get('/api/user/')
-    .set('Authorization', `Bearer ${dinerToken}`);
+    .delete(`/api/user/${userId}`)
+    .set('Authorization', `Bearer ${adminToken}`);
   expect(res.status).toBe(200);
-  expect(res.body.message).toBe('not implemented');
-  expect(res.body.users).toEqual([]);
+  expect(res.body.message).toBe('user deleted');
+
+  // Verify user is gone - login should fail
+  const loginRes = await request(app).put('/api/auth').send({ email, password: 'pass' });
+  expect(loginRes.status).toBe(404);
 });
