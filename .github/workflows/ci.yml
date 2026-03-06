@@ -71,3 +71,72 @@ jobs:
           color=$(if (( $(echo "$coverage < 80" | bc -l) )); then echo "red"; else echo "green"; fi)
           curl -s -X POST "https://pizza-factory.cs329.click/api/badge/${{ secrets.NET_ID }}/jwtpizzaservicecoverage?label=Coverage&value=$coverage%25&color=$color" \
             -H "authorization: bearer ${{ secrets.FACTORY_API_KEY }}"
+
+      - name: Create dist
+        run: |
+          mkdir dist && cp Dockerfile dist
+          cp -r src/* dist && cp *.json dist
+          echo "module.exports = {
+            jwtSecret: '${{ secrets.JWT_SECRET }}',
+            db: {
+              connection: {
+                host: '${{ secrets.DB_HOSTNAME }}',
+                user: 'admin',
+                password: '${{ secrets.DB_PASSWORD }}',
+                database: 'pizza',
+                connectTimeout: 60000,
+              },
+              listPerPage: 10,
+            },
+            factory: {
+              url: 'https://pizza-factory.cs329.click',
+              apiKey: '${{ secrets.FACTORY_API_KEY }}',
+            },
+          };" > dist/config.js
+
+      - name: Upload dist artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: package
+          path: dist/
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    steps:
+      - name: Download dist artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: package
+          path: dist/
+
+      - name: Create OIDC token to AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          audience: sts.amazonaws.com
+          aws-region: us-east-1
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT }}:role/${{ secrets.CI_IAM_ROLE }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push container image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: jwt-pizza-service
+        run: |
+          cd dist
+          docker build --platform=linux/arm64 -t $ECR_REGISTRY/$ECR_REPOSITORY --push .
+
+      - name: Deploy new container
+        run: |
+          aws ecs update-service --cluster jwt-pizza-service --service jwt-pizza-service --force-new-deployment
