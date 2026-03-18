@@ -1,0 +1,262 @@
+{
+  "dashboard": {
+    "title": "Pizza Dashboard",
+    "uid": "pizza-dashboard",
+    "timezone": "browser",
+    "refresh": "5s",
+    "time": {
+      "from": "now-5m",
+      "to": "now"
+    },
+    "panels": [
+      {
+        "id": 1,
+        "title": "Total HTTP Requests / min",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "rate(http_requests_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "Total"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqpm"
+          }
+        }
+      },
+      {
+        "id": 2,
+        "title": "HTTP Requests by Method / min",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "rate(http_requests_get_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "GET"
+          },
+          {
+            "refId": "B",
+            "expr": "rate(http_requests_post_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "POST"
+          },
+          {
+            "refId": "C",
+            "expr": "rate(http_requests_put_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "PUT"
+          },
+          {
+            "refId": "D",
+            "expr": "rate(http_requests_delete_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "DELETE"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "reqpm"
+          }
+        }
+      },
+      {
+        "id": 3,
+        "title": "Active Users",
+        "type": "stat",
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 8 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "active_users_ratio{source=\"jwt-pizza-service\"}",
+            "legendFormat": "Active Users"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Auth Attempts / min",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 18, "x": 6, "y": 8 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "rate(auth_successful_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "Successful"
+          },
+          {
+            "refId": "B",
+            "expr": "rate(auth_failed_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "Failed"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 5,
+        "title": "CPU Usage",
+        "type": "gauge",
+        "gridPos": { "h": 8, "w": 6, "x": 0, "y": 16 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "cpu_usage_percent{source=\"jwt-pizza-service\"}",
+            "legendFormat": "CPU"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 50 },
+                { "color": "red", "value": 80 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 6,
+        "title": "Memory Usage",
+        "type": "gauge",
+        "gridPos": { "h": 8, "w": 6, "x": 6, "y": 16 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "memory_usage_percent{source=\"jwt-pizza-service\"}",
+            "legendFormat": "Memory"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "min": 0,
+            "max": 100,
+            "thresholds": {
+              "steps": [
+                { "color": "green", "value": null },
+                { "color": "yellow", "value": 50 },
+                { "color": "red", "value": 80 }
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 7,
+        "title": "Pizzas Sold / min",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 16 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "rate(pizzas_sold_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "Pizzas Sold"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short"
+          }
+        }
+      },
+      {
+        "id": 8,
+        "title": "Pizza Creation Failures / min",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 24 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "rate(pizza_creation_failures_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "Failures"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {
+              "mode": "fixed",
+              "fixedColor": "red"
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "title": "Revenue / min",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 24 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "rate(pizza_revenue_total{source=\"jwt-pizza-service\"}[1m]) * 60",
+            "legendFormat": "Revenue"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "currencyUSD"
+          }
+        }
+      },
+      {
+        "id": 10,
+        "title": "Service Endpoint Latency",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 0, "y": 32 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "service_endpoint_latency_milliseconds{source=\"jwt-pizza-service\"}",
+            "legendFormat": "Avg Latency"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms"
+          }
+        }
+      },
+      {
+        "id": 11,
+        "title": "Pizza Creation Latency",
+        "type": "timeseries",
+        "gridPos": { "h": 8, "w": 12, "x": 12, "y": 32 },
+        "datasource": { "uid": "grafanacloud-prom", "type": "prometheus" },
+        "targets": [
+          {
+            "refId": "A",
+            "expr": "pizza_creation_latency_milliseconds{source=\"jwt-pizza-service\"}",
+            "legendFormat": "Avg Latency"
+          }
+        ],
+        "fieldConfig": {
+          "defaults": {
+            "unit": "ms"
+          }
+        }
+      }
+    ],
+    "schemaVersion": 39
+  },
+  "overwrite": true
+}
