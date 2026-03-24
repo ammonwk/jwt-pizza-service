@@ -24,6 +24,10 @@ class Logger {
     this.log('info', 'db', { query });
   }
 
+  factoryLogger(orderInfo) {
+    this.log('info', 'factory', orderInfo);
+  }
+
   unhandledErrorLogger(err) {
     this.log('error', 'unhandledException', { message: err.message, stack: err.stack });
   }
