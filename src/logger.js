@@ -20,6 +20,10 @@ class Logger {
     next();
   };
 
+  unhandledErrorLogger(err) {
+    this.log('error', 'unhandledException', { message: err.message, stack: err.stack });
+  }
+
   log(level, type, logData) {
     const labels = { component: config.logging.source, level: level, type: type };
     const values = [this.nowString(), this.sanitize(logData)];
