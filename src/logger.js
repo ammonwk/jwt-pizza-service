@@ -20,6 +20,10 @@ class Logger {
     next();
   };
 
+  dbLogger(query) {
+    this.log('info', 'db', { query });
+  }
+
   unhandledErrorLogger(err) {
     this.log('error', 'unhandledException', { message: err.message, stack: err.stack });
   }
