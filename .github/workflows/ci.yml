@@ -53,6 +53,12 @@ jobs:
               url: 'https://pizza-factory.cs329.click',
               apiKey: '${{ secrets.FACTORY_API_KEY }}',
             },
+            logging: {
+              source: 'jwt-pizza-service',
+              endpointUrl: '${{ secrets.LOGGING_ENDPOINT_URL }}',
+              accountId: '${{ secrets.LOGGING_ACCOUNT_ID }}',
+              apiKey: '${{ secrets.LOGGING_API_KEY }}',
+            },
           };" > src/config.js
 
       - name: Write version file
